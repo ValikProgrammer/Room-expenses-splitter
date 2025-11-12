@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row">
+    <div class="col-lg-8">
+        <h1 class="h3 mb-4">Edit transaction</h1>
+        <form method="post" class="card shadow-sm">
+            <div class="card-body row g-3">
+                <div class="col-md-4">
+                    <label for="date" class="form-label">Date</label>
+                    <input type="date" class="form-control" id="date" name="date" value="{{ request.form.date or default_date }}" required>
+                </div>
+                <div class="col-md-8">
+                    <label for="description" class="form-label">Description</label>
+                    <input type="text" class="form-control" id="description" name="description" value="{{ request.form.description or transaction.description }}" placeholder="e.g. Groceries, rent" required>
+                </div>
+                <div class="col-md-4">
+                    <label for="amount" class="form-label">Total amount</label>
+                    <div class="input-group">
+                        <span class="input-group-text">£</span>
+                        <input type="number" min="0.01" step="0.01" class="form-control" id="amount" name="amount" value="{{ request.form.amount or transaction.amount }}" required>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <label for="payer_id" class="form-label">Paid by</label>
+                    <select class="form-select" id="payer_id" name="payer_id" required>
+                        <option value="" disabled hidden>Select person</option>
+                        {% for member in members %}
+                            <option value="{{ member.id }}" {% if request.form.payer_id == member.id|string or (not request.form.payer_id and transaction.payer_id == member.id) %}selected{% endif %}>{{ member.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label">Participants</label>
+                    <div class="d-flex flex-wrap gap-2">
+                        {% for member in members %}
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" value="{{ member.id }}" id="participant-{{ member.id }}" name="participants" {% if member.id in participant_ids or member.id|string in request.form.getlist('participants') %}checked{% endif %}>
+                                <label class="form-check-label" for="participant-{{ member.id }}">
+                                    {{ member.name }}
+                                </label>
+                            </div>
+                        {% endfor %}
+                    </div>
+                    <div class="form-text">The total is split evenly between selected participants.</div>
+                </div>
+                <div class="col-12">
+                    <label for="comment" class="form-label">Comment (optional)</label>
+                    <textarea class="form-control" id="comment" name="comment" rows="2">{{ request.form.comment or transaction.comment or '' }}</textarea>
+                </div>
+            </div>
+            <div class="card-footer text-end">
+                <a href="{{ url_for('transactions') }}" class="btn btn-outline-secondary">Cancel</a>
+                <button type="submit" class="btn btn-primary">Update transaction</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+

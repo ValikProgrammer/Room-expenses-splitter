@@ -1,0 +1,115 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1 class="h3 mb-1">Transaction statistics</h1>
+        <p class="text-body-secondary mb-0">Visual overview of payments and transaction counts.</p>
+    </div>
+</div>
+
+<div class="row g-4">
+    <div class="col-lg-6">
+        <div class="card shadow-sm">
+            <div class="card-header">
+                <h2 class="h5 mb-0">Transactions paid counter</h2>
+            </div>
+            <div class="card-body">
+                <canvas id="transactionsCountChart" style="max-height: 400px;"></canvas>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-6">
+        <div class="card shadow-sm">
+            <div class="card-header">
+                <h2 class="h5 mb-0">Volume paid by person</h2>
+            </div>
+            <div class="card-body">
+                <canvas id="volumeChart" style="max-height: 400px;"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script>
+    // Transactions count chart
+    const countCtx = document.getElementById('transactionsCountChart').getContext('2d');
+    const countData = {
+        labels: {{ count_labels|tojson }},
+        datasets: [{
+            data: {{ count_values|tojson }},
+            backgroundColor: [
+                'rgba(54, 162, 235, 0.8)',
+                'rgba(255, 99, 132, 0.8)',
+                'rgba(255, 206, 86, 0.8)',
+                'rgba(75, 192, 192, 0.8)',
+                'rgba(153, 102, 255, 0.8)',
+                'rgba(255, 159, 64, 0.8)',
+            ],
+            borderWidth: 2,
+            borderColor: '#fff'
+        }]
+    };
+    new Chart(countCtx, {
+        type: 'doughnut',
+        data: countData,
+        options: {
+            responsive: true,
+            maintainAspectRatio: true,
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            return context.label + ': ' + context.parsed + ' transaction' + (context.parsed !== 1 ? 's' : '');
+                        }
+                    }
+                }
+            }
+        }
+    });
+
+    // Volume paid chart
+    const volumeCtx = document.getElementById('volumeChart').getContext('2d');
+    const volumeData = {
+        labels: {{ volume_labels|tojson }},
+        datasets: [{
+            data: {{ volume_values|tojson }},
+            backgroundColor: [
+                'rgba(54, 162, 235, 0.8)',
+                'rgba(255, 99, 132, 0.8)',
+                'rgba(255, 206, 86, 0.8)',
+                'rgba(75, 192, 192, 0.8)',
+                'rgba(153, 102, 255, 0.8)',
+                'rgba(255, 159, 64, 0.8)',
+            ],
+            borderWidth: 2,
+            borderColor: '#fff'
+        }]
+    };
+    new Chart(volumeCtx, {
+        type: 'doughnut',
+        data: volumeData,
+        options: {
+            responsive: true,
+            maintainAspectRatio: true,
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            return context.label + ': {{ currency_symbol }}' + context.parsed.toFixed(2);
+                        }
+                    }
+                }
+            }
+        }
+    });
+</script>
+{% endblock %}
+

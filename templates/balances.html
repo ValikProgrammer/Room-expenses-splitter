@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1 class="h3 mb-1">Person-to-person balances</h1>
+        <p class="text-body-secondary mb-0">See who owes whom and how much.</p>
+    </div>
+</div>
+
+<div class="row g-4">
+    {% for person in members %}
+        <div class="col-md-6 col-lg-4">
+            <div class="card shadow-sm h-100">
+                <div class="card-header">
+                    <h2 class="h5 mb-0">{{ person.name }}</h2>
+                </div>
+                <div class="card-body">
+                    {% set person_settlement = settlements.get(person.id) %}
+                    {% set owes = person_settlement.owes %}
+                    {% set owed = person_settlement.owed %}
+
+                    {% if owes %}
+                        <h6 class="text-danger mb-2">Owes to:</h6>
+                        <ul class="list-group list-group-flush mb-3">
+                            {% for entry in owes %}
+                                <li class="list-group-item d-flex justify-content-between align-items-center px-0">
+                                    <span>{{ entry.member.name }}</span>
+                                    <span class="badge text-bg-danger">{{ entry.amount|currency }}</span>
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    {% endif %}
+                    
+                    {% if owed %}
+                        <h6 class="text-success mb-2">Owed by:</h6>
+                        <ul class="list-group list-group-flush">
+                            {% for entry in owed %}
+                                <li class="list-group-item d-flex justify-content-between align-items-center px-0">
+                                    <span>{{ entry.member.name }}</span>
+                                    <span class="badge text-bg-success">{{ entry.amount|currency }}</span>
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    {% endif %}
+                    
+                    {% if not owes and not owed %}
+                        <p class="text-body-secondary mb-0">All settled up!</p>
+                    {% endif %}
+                    
+                    {% set net_balance = balances.get(person.id, 0) %}
+                    <div class="mt-3 pt-3 border-top">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <strong>Net balance:</strong>
+                            {% if net_balance > 0 %}
+                                <span class="badge text-bg-success">{{ net_balance|currency }}</span>
+                            {% elif net_balance < 0 %}
+                                <span class="badge text-bg-danger">{{ (net_balance * -1)|currency }}</span>
+                            {% else %}
+                                <span class="badge text-bg-secondary">£0.00</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% endfor %}
+</div>
+{% endblock %}
+

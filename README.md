@@ -1,156 +1,93 @@
+# Room Expense Splitter (single-room edition)
 
-# Project: Roommate Expense Tracker
+Simple Flask app for tracking shared expenses in a single room with a fixed list of members (no auth, one room only).
 
-A lightweight Flask web app to track shared expenses for a room/flat.  
-Core idea: create a room (group of members), add transactions (who paid, how cost is split), view history, compute per-person net balances and suggested settlement payments, and show simple charts.
+## Features
 
-Key behaviors:
-- Record transactions with explicit per-person shares (avoids rounding mismatch).
-- Compute net balance per member: positive = owed, negative = owes.
-- Provide a settlement plan (greedy matcher) suggesting who pays whom.
-- Minimal, responsive UI (Jinja2 + Bootstrap) with REST API for integration.
+- Add expenses via simple form (`/`): date, description, payer, participants, comment; cost is split evenly.
+- `/transactions`: sortable table of expenses, participant filter, quick access to balances.
+- `/balances`: per-person breakdown showing who owes whom.
+- `/members/add`: add/rename/delete members (deletion blocked if referenced by transactions).
+- `/diagrams`: donut charts for number of payments per person and total amount paid.
+- REST API: `GET /api/members`, `GET/POST /api/transactions`.
+- Health endpoint `GET /health`.
+- `client.py` uses `requests` to smoke-test main endpoints.
 
-Purpose: quick MVP for coursework: Dockerized, tested, with Swagger docs and CI pipeline.
+## Tech stack
 
+- Python 3.11, Flask, Flask-SQLAlchemy, Jinja2, Bootstrap 5.
+- SQLite stored in `instance/room_expenses.db` (auto-created).
+- Docker for containerized runs.
+- Requests for basic client checks (`client.py`).
 
-<!-- PAGES.md -->
+## Quick start (local)
 
-## Pages (UI overview)
+```bash
+python -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
+python server.py
+```
 
-These are the main user-facing pages for the MVP.
+The app starts at `http://127.0.0.1:5000`.  
+On first run the DB is bootstrapped with default members: Valentine, Savel, Sasha, Matvei.
 
-### `/`
-- Quick Add Transaction form.
-- Choose room, date, description, payer, total, split type (equal/custom), and comment.
+### Smoke test
 
-### `/rooms/create`
-- Create a room and add members (names or link to users).
+```bash
+python client.py --base-url http://127.0.0.1:5000
+```
 
-### `/transactions`
-- Transactions table for selected room.
-- Columns: Date, Description, Total, Payer, #Participants, Price per each, Comment, Actions (Edit, Remove).
-- Search, sort, pagination, filters.
+## Docker
 
-### `/transactions/<id>/edit`
-- Edit transaction form (modal or page) showing shares.
+```bash
+docker build -t room-expense-app .
+docker run -p 5000:5000 \
+  -v $(pwd)/instance:/app/instance \
+  room-expense-app
+```
 
-### `/results`
-- Per-member net balances.
-- Suggested settlement transactions (who pays whom).
-- Charts: donut/pie for total paid by member; bar for net owed.
+The SQLite file lives in `instance/room_expenses.db`.  
+Mounting the `instance` directory keeps data across container restarts.  
+Override DB location via `DATABASE_URL` if needed.
 
-### `/login`, `/register`, `/logout`
-- Authentication pages.
+## Routes overview
 
-### `/api/docs` (Swagger)
-- Interactive API documentation.
+### UI
 
+- `GET /` – add expense form (and handles submissions).
+- `GET /transactions` – list of transactions with sorting/filtering.
+- `GET|POST /transactions/<id>/edit` – edit existing transaction.
+- `POST /transactions/<id>/delete` – delete transaction.
+- `GET /balances` – per-person owed/owes breakdown.
+- `GET|POST /members/add` – manage members (add + list).
+- `POST /members/<id>/edit` – rename member.
+- `POST /members/<id>/delete` – remove member (if unused).
+- `GET /diagrams` – charts with payments count and volume.
 
-<!-- ROUTES.md -->
+### API
 
-## Routes & API Endpoints
+- `GET /api/members` – JSON list of members.
+- `GET /api/transactions` – JSON list of transactions (supports `sort` and `member_id`).
+- `POST /api/transactions` – create transaction from JSON payload.
+- `GET /health` – basic health check.
 
-### UI (server-rendered)
-- `GET /` — Home / add-transaction form
-- `GET /rooms/create` — Create room form
-- `GET /transactions` — Transactions table (room context)
-- `GET /transactions/<id>/edit` — Edit form
-- `POST /transactions/<id>/remove` — Delete (or use API delete)
-- `GET /results` — Balances + settlement + charts
-- `GET /login`, `POST /login` — Login
-- `GET /register`, `POST /register` — Register
+## Repository layout
 
-### REST API (JSON)
-- `GET  /api/rooms`  
-  -> list rooms
+```
+server.py          # Flask entry point and app setup
+models.py          # SQLAlchemy models
+routes.py          # All views and API endpoints
+utils.py           # Helpers for DB seeding, balances, parsing form data
+templates/         # Jinja2 templates
+client.py          # Simple requests-based checker
+Dockerfile         # Container build instructions
+requirements.txt   # Python dependencies
+README.md          # This file
+```
 
-- `POST /api/rooms`  
-  Payload: `{ name, currency, members: [names or member_ids] }`
+## Next steps / ideas
 
-- `GET  /api/rooms/<room_id>/members`  
-  -> members list
-
-- `GET  /api/transactions?room_id=&page=&per_page=&sort=&q=&date_from=&date_to=&payer_id=&member_id=`  
-  -> paginated transaction list
-
-- `GET  /api/transactions/<id>`  
-  -> transaction detail (includes `shares`)
-
-- `POST /api/transactions`  
-  Payload example:
-  ```json
-  {
-    "room_id":1,
-    "date":"2025-10-23",
-    "description":"Groceries",
-    "total_amount":43.44,
-    "payer_member_id":2,
-    "shares":[{"member_id":1,"owes_amount":14.48}, ...],
-    "comment":"weekly shop"
-  }
-
-
-### Tech Stack 
-
-- **Backend:** Flask (app factory + blueprints)  
-- **ORM / DB:** SQLAlchemy + Alembic (Flask-Migrate)  
-- **Database:** SQLite (development) / PostgreSQL (production)  
-- **Auth:** Flask-Login (session-based)  
-- **Frontend:** Jinja2 templates + Bootstrap; Chart.js for charts  
-- **Containerization:** Docker + docker-compose  
-- **Testing:** pytest (unit + integration)  
-- **API docs:** Swagger (Flasgger or flask-restx)  
-- **CI:** GitHub Actions (tests, linters, image build)  
-- **CD:** Any Docker-capable host (Render / Railway / Fly / DigitalOcean / AWS etc.)
-
-
-
-
-## Main TODO 
-
-### Setup & infra
-- [ ] Git repo + `.gitignore`, branches (`develop`, `main`)
-- [ ] Dockerfile + docker-compose
-- [ ] GitHub Actions workflow: run tests, linters, build image
-- [ ] Swagger setup (`/api/docs`)
-
-### Core models & DB
-- [ ] Implement models: User, Room, RoomMember, Transaction, TransactionShare, Payment (optional)
-- [ ] Alembic migrations
-- [ ] Seed script (dev data)
-
-### Auth & rooms
-- [ ] Registration & login (Flask-Login)
-- [ ] Room creation & member management
-- [ ] Authorization checks (room-only access)
-
-### Transactions
-- [ ] Add transaction (explicit `shares`) — server + UI
-- [ ] List transactions with search/sort/pagination
-- [ ] Edit & delete transactions (API + UI)
-- [ ] Validation: shares sum == total (with small rounding tolerance)
-
-### Balances & settlement
-- [ ] Implement per-member balances endpoint
-- [ ] Implement settlement endpoint (greedy algorithm)
-- [ ] Unit tests for both
-
-### Frontend & UX
-- [ ] `/` quick-add form
-- [ ] `/transactions` table with actions
-- [ ] `/results` page with charts (Chart.js)
-- [ ] Responsive layout, form validation
-
-### Testing & quality
-- [ ] Unit tests for models and business logic
-- [ ] Integration/API tests
-- [ ] Linting (black, flake8) integrated into CI
-- [ ] Coverage report
-
-### Production readiness
-- [ ] Environment variable config (SECRET_KEY, DATABASE_URL)
-- [ ] HTTPS and secure headers
-- [ ] Logging (stdout + rotating file)
-- [ ] Healthcheck endpoint
-- [ ] Backup strategy for DB
-
+- Automated tests (pytest) and linting.
+- GitHub Actions + Railway deployment pipeline.
+- More advanced reports: monthly summaries, suggested settlements, etc.
