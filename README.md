@@ -2,6 +2,9 @@
 
 Simple Flask app for tracking shared expenses in a single room with a fixed list of members (no auth, one room only).
 
+## How to access
+go to `https://room-expenses-splitter-production.up.railway.app/`
+
 ## Features
 
 - Add expenses via simple form (`/`): date, description, payer, participants, comment; cost is split evenly.
