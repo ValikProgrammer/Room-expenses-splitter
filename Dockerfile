@@ -22,5 +22,5 @@ COPY . .
 
 EXPOSE 5000
 
-# Replace 'src:app' if your app object lives elsewhere (e.g. 'app:app')
-CMD ["gunicorn", "src:app", "--bind", "0.0.0.0:5000", "--workers", "1"]
+# Replace target with the module that creates Flask app (server.py -> server:app)
+CMD ["gunicorn", "server:app", "--bind", "0.0.0.0:5000", "--workers", "1"]

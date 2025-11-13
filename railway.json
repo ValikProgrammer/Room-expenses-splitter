@@ -5,7 +5,7 @@
   "services": [
     {
       "name": "web",
-      "startCommand": "gunicorn 'src:app' -b 0.0.0.0:$PORT",
+      "startCommand": "gunicorn server:app -b 0.0.0.0:$PORT",
       "port": 5000
     }
   ]
