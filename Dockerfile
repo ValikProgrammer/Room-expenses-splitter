@@ -11,15 +11,16 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential \
   && rm -rf /var/lib/apt/lists/*
 
-# copy requirements and install
-COPY  .
-RUN python -m pip install --upgrade pip
-RUN pip install --no-cache-dir -r 
+# copy only requirements first for better layer caching
+COPY requirements.txt .
 
-# copy app
+RUN python -m pip install --upgrade pip
+RUN pip install --no-cache-dir -r requirements.txt
+
+# copy the rest of the application
 COPY . .
 
 EXPOSE 5000
 
-# Adjust module: change 'src:app' to the actual entrypoint if different (e.g. 'app:app' or 'wsgi:app')
+# Replace 'src:app' if your app object lives elsewhere (e.g. 'app:app')
 CMD ["gunicorn", "src:app", "--bind", "0.0.0.0:5000", "--workers", "1"]
