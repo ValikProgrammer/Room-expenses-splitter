@@ -1,0 +1,93 @@
+# Byte-compiled / caches
+__pycache__/
+*.py[cod]
+*$py.class
+
+# C extensions
+*.so
+
+# Distribution / packaging
+build/
+dist/
+eggs/
+.eggs/
+parts/
+sdist/
+wheels/
+pip-wheel-metadata/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Installer logs
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Unit test / coverage
+htmlcov/
+.tox/
+.nox/
+.coverage
+.coverage.*
+.cache
+.pytest_cache/
+nosetests.xml
+coverage.xml
+*.cover
+*.py,cover
+.hypothesis/
+
+# Flask / project instance
+instance/
+.webassets-cache
+staticfiles/
+media/
+
+# Environment / virtualenv
+.env
+.env.*
+venv/
+venv*/
+ENV/
+env/
+env.bak/
+.venv/
+.pipenv/
+Pipfile.lock
+
+# Python tooling caches
+.mypy_cache/
+.pyre/
+.cache/
+.python-version
+
+# Jupyter
+.ipynb_checkpoints
+
+# IDEs / editors
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Databases
+*.sqlite3
+*.db
+*.db-journal
+
+# Keys / secrets
+*.pem
+*.key
+secrets.json
+
+# Misc
+*.manifest
+*.spec
+*.prof

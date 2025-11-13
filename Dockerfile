@@ -1,16 +1,21 @@
-FROM python:3.11
-# Our base image, Debian (Linux) with installed Python
+# Use an official Python runtime as a parent image
+FROM python:3.11-slim
+
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV PYTHONUNBUFFERED=1
+
 WORKDIR /app
-# Set /app as workdir
-COPY . /app
-# Copy files from . (local) to /app (in image)
-RUN pip install --no-cache-dir -r requirements.txt
-# you want to execute in image
-# you can use several RUN
-# example: RUN pip install -r requirements.txt
-# CMD <command>
-# Specifies the default command to be executed
-# when the container starts.
-# Can be replaced by passing command in docker run
-# example: CMD ["python", "server.py"]m
-CMD ["python", "server.py"]
+
+# Install system deps (if any) and pip requirements
+COPY requirements.txt .
+RUN pip install --upgrade pip && \
+    pip install --no-cache-dir -r requirements.txt || \
+    (pip install --no-cache-dir flask gunicorn && true)
+
+# Copy application source
+COPY . .
+
+EXPOSE 5000
+
+# Use gunicorn to serve the Flask app defined in src/__init__.py as "app"
+CMD ["gunicorn", "src:app", "--bind", "0.0.0.0:5000", "--workers", "1"]

@@ -20,23 +20,6 @@ Simple Flask app for tracking shared expenses in a single room with a fixed list
 - Docker for containerized runs.
 - Requests for basic client checks (`client.py`).
 
-## Quick start (local)
-
-```bash
-python -m venv .venv
-source .venv/bin/activate
-pip install -r requirements.txt
-python server.py
-```
-
-The app starts at `http://127.0.0.1:5000`.  
-On first run the DB is bootstrapped with default members: Valentine, Savel, Sasha, Matvei.
-
-### Smoke test
-
-```bash
-python client.py --base-url http://127.0.0.1:5000
-```
 
 ## Docker
 

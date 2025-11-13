@@ -1,0 +1,44 @@
+name: CI — build + run + route-checks
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+
+jobs:
+  build-and-smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Build Docker image
+        run: |
+          docker build -t re-splitter:ci .
+
+      - name: Run container
+        run: |
+          docker run -d --name re-splitter-ci -p 5000:5000 re-splitter:ci
+          # give the app some time to start
+          for i in $(seq 1 30); do
+            if curl -sSf http://localhost:5000/ >/dev/null 2>&1; then
+              echo "app is up"
+              break
+            fi
+            echo "waiting for app... (${i})"
+            sleep 2
+          done
+          # final check, fail if not reachable
+          curl -sSf http://localhost:5000/ || (docker logs re-splitter-ci && false)
+
+      - name: Check add member route accessible
+        run: |
+          # try a GET to the add_member route (template indicates such route exists)
+          curl -sSf -I http://localhost:5000/add_member || (echo "add_member route failed" && docker logs re-splitter-ci && false)
+
+      - name: Clean up
+        if: always()
+        run: |
+          docker stop re-splitter-ci || true
+          docker rm re-splitter-ci || true
+          docker image rm re-splitter:ci || true

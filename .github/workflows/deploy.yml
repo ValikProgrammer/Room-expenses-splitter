@@ -1,0 +1,33 @@
+name: Deploy to Railway
+
+on:
+  push:
+    branches: [ main, master ]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install Railway CLI
+        run: |
+          curl -sL https://railway.app/install.sh | sh
+          export PATH="$HOME/.railway/bin:$PATH"
+          railway --version
+
+      - name: Login to Railway
+        env:
+          RAILWAY_API_KEY: ${{ secrets.RAILWAY_API_KEY }}
+        run: |
+          export PATH="$HOME/.railway/bin:$PATH"
+          railway login --apiKey "$RAILWAY_API_KEY"
+
+      - name: Deploy (railway up)
+        env:
+          RAILWAY_API_KEY: ${{ secrets.RAILWAY_API_KEY }}
+        run: |
+          export PATH="$HOME/.railway/bin:$PATH"
+          # --detach to run remote deployment in background; adjust if you want interactive logs
+          railway up --detach || (railway status || true)

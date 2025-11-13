@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from datetime import datetime
-from decimal import Decimal, ROUND_HALF_UP
+from decimal import Decimal, ROUND_HALF_EVEN # to the closest Z number 
 from typing import Dict, Iterable, List
 
 from sqlalchemy.orm import joinedload
@@ -32,13 +32,15 @@ def split_amount(total: Decimal, portions: int) -> List[Decimal]:
         raise ValueError("portions must be a positive integer")
 
     quantizer = Decimal("0.01")
-    base_share = (total / portions).quantize(quantizer, rounding=ROUND_HALF_UP)
+    base_share = (total / portions).quantize(quantizer, rounding=ROUND_HALF_EVEN)
     shares = [base_share for _ in range(portions)]
 
     difference = total - sum(shares)
     if difference:
+        # If there is any small leftover 
+        # adjust the last share to ensure the sum matches the total
         shares[-1] = (shares[-1] + difference).quantize(
-            quantizer, rounding=ROUND_HALF_UP
+            quantizer, rounding=ROUND_HALF_EVEN
         )
     return shares
 

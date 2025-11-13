@@ -16,6 +16,8 @@ database_uri = os.getenv("DATABASE_URL", f"sqlite:///{default_db_path}")
 app.config["SQLALCHEMY_DATABASE_URI"] = database_uri
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 app.config["SECRET_KEY"] = "dev-secret-key"  # Used for flash messages; replace in production.
+app.config["SECRET_KEY"] = os.getenv("SECRET_KEY", app.config["SECRET_KEY"])
+
 
 db.init_app(app)
 
