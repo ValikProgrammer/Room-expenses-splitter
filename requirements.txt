@@ -1,3 +1,5 @@
-Flask
-Flask-SQLAlchemy
-requests
+# minimal requirements used by CI & Railway deploy
+flask>=2.0
+gunicorn>=20.0
+flask_sqlalchemy>=3.0
+requests>=2.0

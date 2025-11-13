@@ -6,16 +6,20 @@ ENV PYTHONUNBUFFERED=1
 
 WORKDIR /app
 
-# Install system deps (if any) and pip requirements
-COPY requirements.txt .
-RUN pip install --upgrade pip && \
-    pip install --no-cache-dir -r requirements.txt || \
-    (pip install --no-cache-dir flask gunicorn && true)
+# system deps (add locale/timezone tools if needed)
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    build-essential \
+  && rm -rf /var/lib/apt/lists/*
 
-# Copy application source
+# copy requirements and install
+COPY  .
+RUN python -m pip install --upgrade pip
+RUN pip install --no-cache-dir -r 
+
+# copy app
 COPY . .
 
 EXPOSE 5000
 
-# Use gunicorn to serve the Flask app defined in src/__init__.py as "app"
+# Adjust module: change 'src:app' to the actual entrypoint if different (e.g. 'app:app' or 'wsgi:app')
 CMD ["gunicorn", "src:app", "--bind", "0.0.0.0:5000", "--workers", "1"]
