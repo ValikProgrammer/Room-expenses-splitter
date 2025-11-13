@@ -20,7 +20,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 # copy the rest of the application
 COPY . .
 
-EXPOSE 5000
+EXPOSE 8080
 
-# Replace target with the module that creates Flask app (server.py -> server:app)
-CMD ["sh", "-c", "gunicorn server:app --bind 0.0.0.0:${PORT:-5000} --workers 1"]
+# Use shell form so $PORT can be expanded at runtime (default to 8080)
+CMD ["sh", "-lc", "gunicorn server:app --bind 0.0.0.0:${PORT:-8080} --workers 1"]
