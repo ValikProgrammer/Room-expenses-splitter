@@ -29,12 +29,17 @@ jobs:
             sleep 2
           done
           # final check, fail if not reachable
-          curl -sSf http://localhost:5000/ || (docker logs re-splitter-ci && false)
+          curl -sSf http://localhost:5000/ || (echo "root failed" && docker logs re-splitter-ci && false)
 
-      - name: Check add member route accessible
+      - name: Check members add route accessible
         run: |
-          # try a GET to the add_member route (template indicates such route exists)
-          curl -sSf -I http://localhost:5000/add_member || (echo "add_member route failed" && docker logs re-splitter-ci && false)
+          # correct route is /members/add (not /add_member)
+          curl -sSf -I http://localhost:5000/members/add || (echo "/members/add failed" && docker logs re-splitter-ci && false)
+
+      - name: Check health and API
+        run: |
+          curl -sSf http://localhost:5000/health || (echo "/health failed" && docker logs re-splitter-ci && false)
+          curl -sSf http://localhost:5000/api/members || (echo "/api/members failed" && docker logs re-splitter-ci && false)
 
       - name: Clean up
         if: always()
