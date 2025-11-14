@@ -23,4 +23,4 @@ COPY . .
 EXPOSE 8080
 
 # Use shell form so $PORT can be expanded at runtime (default to 8080)
-CMD ["sh", "-lc", "gunicorn server:app --bind 0.0.0.0:${PORT:-8080} --workers 1"]
+CMD ["sh", "-lc", "gunicorn app.server:app --bind 0.0.0.0:${PORT:-8080} --workers 1"]

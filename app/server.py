@@ -32,4 +32,5 @@ with app.app_context():
 if __name__ == "__main__":
     with app.app_context():
         initialize_database()
-    app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 80800)), debug=True)
+    # default port should be 8080 (typo 80800 fixed)
+    app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 8080)), debug=True)
