@@ -28,7 +28,7 @@ go to `https://room-expenses-splitter-production.up.railway.app/`
 
 ```bash
 docker build -t room-expense-app .
-docker run -p 5000:5000 \
+docker run -p 80800:80800 \
   -v $(pwd)/instance:/app/instance \
   room-expense-app
 ```
