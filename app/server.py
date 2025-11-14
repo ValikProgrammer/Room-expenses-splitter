@@ -2,9 +2,10 @@ import os
 from pathlib import Path
 from flask import Flask
 
-from models import db
-from routes import register_routes
-from utils import initialize_database
+# use package-qualified imports so gunicorn can import app.server correctly
+from app.models import db
+from app.routes import register_routes
+from app.utils import initialize_database
 
 app = Flask(__name__, instance_relative_config=True)
 os.makedirs(app.instance_path, exist_ok=True)
