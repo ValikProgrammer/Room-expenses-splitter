@@ -1,6 +1,5 @@
 import os
 from pathlib import Path
-
 from flask import Flask
 
 from models import db
@@ -15,22 +14,15 @@ database_uri = os.getenv("DATABASE_URL", f"sqlite:///{default_db_path}")
 
 app.config["SQLALCHEMY_DATABASE_URI"] = database_uri
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
-app.config["SECRET_KEY"] = "dev-secret-key"  # Used for flash messages; replace in production.
-app.config["SECRET_KEY"] = os.getenv("SECRET_KEY", app.config["SECRET_KEY"])
+app.config["SECRET_KEY"] = os.getenv("SECRET_KEY", "dev-secret-key")
 
-
+# initialize extensions and routes
 db.init_app(app)
-
-# Register all routes
 register_routes(app)
 
-# Initialize database
+# create DB if not exists (runs safely inside app context)
 with app.app_context():
     initialize_database()
 
-
 if __name__ == "__main__":
-    with app.app_context():
-        initialize_database()
-    # default port should be 8080 (typo 80800 fixed)
     app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 8080)), debug=True)
