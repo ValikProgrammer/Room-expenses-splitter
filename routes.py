@@ -322,7 +322,13 @@ def register_routes(app):
 
     @app.route("/health")
     def health():
-        return {"status": "ok"}
+        """Health check endpoint for Railway monitoring."""
+        try:
+            # Quick DB check
+            Person.query.count()
+            return {"status": "ok", "database": "connected"}
+        except Exception as e:
+            return {"status": "error", "message": str(e)}, 500
 
 
 def serialize_transaction(txn: Transaction) -> Dict[str, object]:
