@@ -4,35 +4,28 @@ from datetime import date, datetime
 from decimal import Decimal
 from typing import Dict, Iterable
 
-from flask import (
-    flash,
-    jsonify,
-    redirect,
-    render_template,
-    request,
-    url_for,
-)
+from flask import (flash,jsonify,redirect,render_template,request,url_for)
 from sqlalchemy import func
 from sqlalchemy.orm import joinedload
 
 from models import Person, Transaction, TransactionShare, db
-from utils import (
-    DEFAULT_CURRENCY_SYMBOL,
-    build_transaction_from_form,
-    compute_balances,
-    compute_person_to_person_debts,
-    split_amount,
-)
+from utils import (DEFAULT_CURRENCY_SYMBOL,build_transaction_from_form,compute_balances,compute_person_to_person_debts,split_amount,)
 
 
 def register_routes(app):
-    """Register all routes with the Flask app."""
+    @app.before_request
+    def log_request_info():
+        client_ip = request.remote_addr
+        method = request.method
+        path = request.path
+        app.logger.info(f"before_request: {method} {path} from {client_ip}")
 
     @app.template_filter("currency")
     def format_currency(value: Decimal | None) -> str:
         if value is None:
             return "-"
         return f"{DEFAULT_CURRENCY_SYMBOL}{Decimal(value):,.2f}"
+
 
     @app.route("/", methods=["GET", "POST"])
     def index():
@@ -322,7 +315,6 @@ def register_routes(app):
 
     @app.route("/health")
     def health():
-        """Health check endpoint for Railway monitoring."""
         try:
             # Quick DB check
             Person.query.count()

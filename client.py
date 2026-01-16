@@ -1,5 +1,3 @@
-"""Simple client to verify Flask endpoints using the requests library."""
-
 from __future__ import annotations
 
 import argparse
@@ -11,7 +9,7 @@ import requests
 
 def main(argv: List[str] | None = None) -> int:
     parser = argparse.ArgumentParser(
-        description="Check Room Expense Tracker endpoints."
+        description="Check endpoints."
     )
     parser.add_argument(
         "--base-url",

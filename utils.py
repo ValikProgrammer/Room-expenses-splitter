@@ -113,11 +113,19 @@ def build_transaction_from_form(form_data, members: Iterable[Person]) -> Transac
     if not payer_id:
         raise ValueError("Select who paid for this expense.")
 
-    payer = Person.query.get(int(payer_id))
+    payer = db.session.get(Person, int(payer_id))
     if not payer:
         raise ValueError("Selected payer does not exist.")
 
-    participant_ids = [int(pid) for pid in form_data.getlist("participants")]
+    # Support both Flask request.form (has getlist) and plain dicts
+    if hasattr(form_data, "getlist"):
+        participants_raw = form_data.getlist("participants")
+    else:
+        participants_raw = form_data.get("participants", [])
+        if not isinstance(participants_raw, list):
+            participants_raw = [participants_raw] if participants_raw else []
+    
+    participant_ids = [int(pid) for pid in participants_raw]
     participant_ids = list(dict.fromkeys(participant_ids))  # Remove duplicates
 
     if len(participant_ids) == 0:

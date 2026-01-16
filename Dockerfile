@@ -23,6 +23,4 @@ COPY . .
 EXPOSE 5000
 
 # Replace target with the module that creates Flask app (server.py -> server:app)
-# Railway will use railway.json startCommand, but this is a fallback
-# Use shell form to allow PORT env var expansion
-CMD ["sh", "-c", "gunicorn server:app --bind 0.0.0.0:${PORT:-5000} --workers 1 --timeout 120 --access-logfile - --error-logfile -"]
+CMD ["sh", "-c", "gunicorn server:app --bind 0.0.0.0:${PORT:-5000} --workers 1 --timeout 120 --error-logfile -"]

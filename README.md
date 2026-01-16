@@ -20,18 +20,28 @@ Simple Flask app for tracking shared expenses in a single room with a fixed list
 - Docker for containerized runs.
 - Requests for basic client checks (`client.py`).
 
+## Testing
+### Run unit and integration tests
+```bash
+pytest
+```
+### Test the running app
+```bash
+python client.py
+```
 
 ## Docker
+
+Build and run the application:
 
 ```bash
 docker build -t room-expense-app .
 docker run -p 5000:5000 \
-  -v $(pwd)/instance:/app/instance \
+  -v "$(pwd)/instance:/app/instance" \
   room-expense-app
 ```
 
-The SQLite file lives in `instance/room_expenses.db`.  
-Mounting the `instance` directory keeps data across container restarts.  
+The SQLite file located in `instance/room_expenses.db`.    
 Override DB location via `DATABASE_URL` if needed.
 
 ## Routes overview
